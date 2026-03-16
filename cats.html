@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MEOW — The World of Cats</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --cream: #faf6f0;
+  --warm: #f0e8dc;
+  --sand: #e2d5c3;
+  --caramel: #c49a6c;
+  --brown: #8b5e3c;
+  --dark: #1c1410;
+  --mid: #2e2018;
+  --text: #3a2810;
+  --gray: #9a8878;
+  --accent: #d4845a;
+  --soft: #f5ede3;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--cream);
+  color: var(--text);
+  font-family: 'Jost', sans-serif;
+  font-weight: 300;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* ── CURSOR ── */
+.cursor {
+  position: fixed; width: 8px; height: 8px;
+  background: var(--accent); border-radius: 50%;
+  pointer-events: none; z-index: 9999;
+  transform: translate(-50%,-50%);
+}
+.cursor-ring {
+  position: fixed; width: 34px; height: 34px;
+  border: 1px solid rgba(196,154,108,0.5);
+  border-radius: 50%; pointer-events: none; z-index: 9998;
+  transform: translate(-50%,-50%);
+  transition: all 0.4s cubic-bezier(.25,.46,.45,.94);
+}
+
+/* ── LOADER ── */
+#loader {
+  position: fixed; inset: 0;
+  background: var(--dark);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 9000; transition: opacity 0.8s ease;
+}
+.loader-cat {
+  font-size: 4rem;
+  animation: catBounce 0.7s ease-in-out infinite alternate;
+}
+@keyframes catBounce {
+  from { transform: translateY(-12px) rotate(-5deg); }
+  to   { transform: translateY(12px)  rotate( 5deg); }
+}
+.loader-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.4rem; letter-spacing: 0.4em;
+  color: var(--sand); margin-top: 1.5rem;
+  text-transform: uppercase;
+  animation: fadePulse 1.2s ease-in-out infinite;
+}
+@keyframes fadePulse { 0%,100%{opacity:.4} 50%{opacity:1} }
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 500;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 1.4rem 3.5rem;
+  background: rgba(250,246,240,0.88);
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid rgba(196,154,108,0.18);
+}
+.nav-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.6rem; font-weight: 600;
+  letter-spacing: 0.12em; color: var(--dark);
+}
+.nav-logo span { color: var(--accent); font-style: italic; }
+.nav-links { display: flex; gap: 2.5rem; list-style: none; }
+.nav-links a {
+  font-size: 0.78rem; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--gray); text-decoration: none; cursor: none;
+  transition: color 0.3s;
+}
+.nav-links a:hover, .nav-links a.active { color: var(--accent); }
+
+/* ── HERO ── */
+#hero {
+  min-height: 100vh;
+  display: grid; grid-template-columns: 1fr 1fr;
+  align-items: center; padding: 8rem 3.5rem 4rem;
+  position: relative; overflow: hidden;
+  background: var(--cream);
+}
+.hero-bg-shape {
+  position: absolute; top: -10%; right: -5%;
+  width: 55%; aspect-ratio: 1;
+  background: radial-gradient(ellipse at center, var(--warm) 0%, transparent 70%);
+  border-radius: 50%; pointer-events: none;
+}
+.hero-dots {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image: radial-gradient(circle, rgba(196,154,108,0.12) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+.hero-left { position: relative; z-index: 2; }
+.hero-eyebrow {
+  font-size: 0.72rem; letter-spacing: 0.35em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 1.4rem;
+  display: flex; align-items: center; gap: 1rem;
+}
+.hero-eyebrow::before { content:''; flex: 0 0 28px; height: 1px; background: var(--accent); }
+
+h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(3.5rem, 7vw, 6.5rem);
+  font-weight: 300; line-height: 1.05; letter-spacing: -0.01em;
+  color: var(--dark); margin-bottom: 1.8rem;
+}
+h1 em { font-style: italic; color: var(--accent); }
+.hero-desc {
+  font-size: 1rem; line-height: 1.85; color: var(--gray);
+  max-width: 420px; margin-bottom: 2.8rem;
+}
+.hero-ctas { display: flex; gap: 1rem; flex-wrap: wrap; }
+.btn-fill {
+  background: var(--dark); color: var(--cream);
+  padding: 0.85rem 2.2rem;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.75rem; font-weight: 500;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  border: none; cursor: none; transition: background 0.3s, transform 0.2s;
+}
+.btn-fill:hover { background: var(--accent); transform: translateY(-2px); }
+.btn-line {
+  background: transparent; color: var(--dark);
+  padding: 0.85rem 2.2rem;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.75rem; font-weight: 400;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  border: 1px solid rgba(58,40,16,0.25); cursor: none;
+  transition: border-color 0.3s, color 0.3s;
+}
+.btn-line:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Big cat illustration (CSS-drawn) */
+.hero-right {
+  position: relative; z-index: 2;
+  display: flex; align-items: center; justify-content: center;
+}
+.cat-frame {
+  width: 420px; height: 420px;
+  border-radius: 50% 40% 50% 40%;
+  background: var(--warm);
+  border: 1px solid rgba(196,154,108,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11rem;
+  animation: floatCat 4s ease-in-out infinite;
+  position: relative; overflow: hidden;
+}
+@keyframes floatCat {
+  0%,100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-18px) rotate(1.5deg); }
+}
+.cat-frame::after {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0; height: 40%;
+  background: linear-gradient(to top, rgba(196,154,108,0.08), transparent);
+}
+.hero-stat-strip {
+  display: flex; gap: 3rem; margin-top: 3rem;
+}
+.hero-stat { }
+.stat-n {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.2rem; font-weight: 600; color: var(--dark); line-height: 1;
+}
+.stat-l {
+  font-size: 0.72rem; letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--gray); margin-top: 0.2rem;
+}
+
+/* ── SECTIONS ── */
+section { padding: 7rem 3.5rem; }
+.section-eyebrow {
+  font-size: 0.7rem; letter-spacing: 0.3em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 0.6rem;
+  display: flex; align-items: center; gap: 0.8rem;
+}
+.section-eyebrow::before { content:''; flex: 0 0 18px; height: 1px; background: var(--accent); }
+.section-heading {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2.2rem, 4.5vw, 3.8rem);
+  font-weight: 300; letter-spacing: -0.01em;
+  color: var(--dark); margin-bottom: 3rem; line-height: 1.1;
+}
+
+/* ── BREED EXPLORER ── */
+#breeds { background: var(--soft); }
+.breed-search-bar {
+  display: flex; gap: 1rem; align-items: center;
+  margin-bottom: 2.5rem; max-width: 500px;
+}
+.search-input {
+  flex: 1; background: var(--cream);
+  border: 1px solid rgba(196,154,108,0.3);
+  padding: 0.9rem 1.2rem;
+  font-family: 'Jost', sans-serif; font-size: 0.9rem;
+  color: var(--text); outline: none; cursor: text;
+  transition: border-color 0.3s;
+}
+.search-input:focus { border-color: var(--accent); }
+.search-input::placeholder { color: var(--gray); }
+.filter-tags { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 2.5rem; }
+.tag {
+  padding: 0.4rem 1rem;
+  font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase;
+  border: 1px solid rgba(196,154,108,0.25); color: var(--gray);
+  cursor: pointer; transition: all 0.25s;
+  background: transparent;
+  font-family: 'Jost', sans-serif;
+}
+.tag:hover, .tag.active { background: var(--accent); color: var(--cream); border-color: var(--accent); }
+
+.breeds-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+.breed-card {
+  background: var(--cream);
+  border: 1px solid rgba(196,154,108,0.15);
+  overflow: hidden; cursor: pointer;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.breed-card:hover { transform: translateY(-6px); box-shadow: 0 20px 50px rgba(58,40,16,0.1); }
+.breed-img {
+  height: 180px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 5rem;
+  position: relative; overflow: hidden;
+}
+.breed-img::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, transparent 50%, rgba(250,246,240,0.9));
+}
+.breed-body { padding: 1.2rem 1.4rem 1.4rem; }
+.breed-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.3rem; font-weight: 600; color: var(--dark); margin-bottom: 0.4rem;
+}
+.breed-origin {
+  font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 0.8rem;
+}
+.breed-desc { font-size: 0.85rem; line-height: 1.7; color: var(--gray); }
+.breed-traits { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 1rem; }
+.trait {
+  font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 0.2rem 0.6rem; background: var(--warm);
+  border: 1px solid rgba(196,154,108,0.2); color: var(--brown);
+}
+.hidden { display: none; }
+
+/* ── CAT FACTS ── */
+#facts { background: var(--dark); color: var(--cream); }
+#facts .section-heading { color: var(--cream); }
+#facts .section-eyebrow { color: var(--caramel); }
+#facts .section-eyebrow::before { background: var(--caramel); }
+.fact-machine {
+  max-width: 680px; margin: 0 auto; text-align: center;
+}
+.fact-card {
+  background: var(--mid); border: 1px solid rgba(196,154,108,0.15);
+  padding: 3.5rem; margin-bottom: 2rem; min-height: 180px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 1.5rem;
+  position: relative; overflow: hidden;
+}
+.fact-card::before {
+  content: '"';
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 8rem; color: rgba(196,154,108,0.08);
+  position: absolute; top: -1rem; left: 1.5rem; line-height: 1;
+}
+.fact-number {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.8rem; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--caramel);
+}
+.fact-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.6rem; font-weight: 300; line-height: 1.5;
+  color: var(--cream); font-style: italic;
+  transition: opacity 0.4s ease;
+}
+.fact-btns { display: flex; gap: 1rem; justify-content: center; }
+.fact-btn {
+  background: transparent; border: 1px solid rgba(196,154,108,0.25);
+  color: var(--sand); padding: 0.8rem 2rem;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.75rem; letter-spacing: 0.18em; text-transform: uppercase;
+  cursor: pointer; transition: all 0.3s;
+}
+.fact-btn:hover { border-color: var(--caramel); color: var(--caramel); }
+.fact-btn.primary-fact { background: var(--caramel); color: var(--dark); border-color: var(--caramel); }
+.fact-btn.primary-fact:hover { background: var(--accent); border-color: var(--accent); }
+
+/* ── CAT CARE ── */
+#care { background: var(--cream); }
+.care-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1px; background: rgba(196,154,108,0.12);
+}
+.care-item {
+  background: var(--cream); padding: 2.5rem;
+  transition: background 0.3s; cursor: pointer;
+  position: relative;
+}
+.care-item:hover { background: var(--soft); }
+.care-item::after {
+  content: '';
+  position: absolute; bottom: 0; left: 2.5rem; right: 2.5rem;
+  height: 1px; background: rgba(196,154,108,0.1);
+}
+.care-icon { font-size: 2.2rem; margin-bottom: 1.2rem; }
+.care-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.3rem; font-weight: 600; color: var(--dark);
+  margin-bottom: 0.6rem;
+}
+.care-text { font-size: 0.88rem; line-height: 1.75; color: var(--gray); }
+.care-expand {
+  margin-top: 1rem; max-height: 0; overflow: hidden;
+  transition: max-height 0.4s ease;
+}
+.care-item.open .care-expand { max-height: 200px; }
+.care-more {
+  font-size: 0.78rem; color: var(--accent);
+  margin-top: 0.8rem; font-style: italic;
+}
+.care-arrow {
+  position: absolute; top: 2.5rem; right: 2.5rem;
+  font-size: 1.2rem; color: var(--caramel);
+  transition: transform 0.3s;
+}
+.care-item.open .care-arrow { transform: rotate(90deg); }
+
+/* ── NAME GENERATOR ── */
+#names { background: var(--soft); }
+.name-gen {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start;
+}
+.gen-controls { }
+.gen-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.6rem; font-weight: 400; margin-bottom: 1.8rem; color: var(--dark);
+}
+.gen-options { display: flex; flex-direction: column; gap: 1.2rem; margin-bottom: 2rem; }
+.gen-row { display: flex; flex-direction: column; gap: 0.5rem; }
+.gen-label {
+  font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gray);
+}
+.gen-select, .gen-radio-group {
+  background: var(--cream); border: 1px solid rgba(196,154,108,0.25);
+  padding: 0.8rem 1rem;
+  font-family: 'Jost', sans-serif; font-size: 0.9rem;
+  color: var(--text); outline: none; cursor: pointer;
+  transition: border-color 0.3s; width: 100%;
+}
+.gen-select:focus { border-color: var(--accent); }
+.radio-row { display: flex; gap: 0.8rem; flex-wrap: wrap; }
+.radio-opt {
+  padding: 0.5rem 1rem; border: 1px solid rgba(196,154,108,0.25);
+  font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase;
+  cursor: pointer; transition: all 0.2s; font-family: 'Jost', sans-serif;
+  color: var(--gray); background: transparent;
+}
+.radio-opt:hover, .radio-opt.sel { background: var(--accent); color: var(--cream); border-color: var(--accent); }
+
+.gen-results { }
+.result-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.3rem; font-style: italic; color: var(--dark); margin-bottom: 1.5rem;
+}
+.names-list { display: flex; flex-direction: column; gap: 0.6rem; }
+.name-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.9rem 1.2rem; background: var(--cream);
+  border: 1px solid rgba(196,154,108,0.12);
+  transition: border-color 0.2s;
+  cursor: pointer;
+}
+.name-item:hover { border-color: var(--accent); }
+.name-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.3rem; font-weight: 600; color: var(--dark);
+}
+.name-meaning { font-size: 0.78rem; color: var(--gray); font-style: italic; }
+.name-copy {
+  font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--caramel); opacity: 0; transition: opacity 0.2s;
+}
+.name-item:hover .name-copy { opacity: 1; }
+
+/* ── GALLERY / MOOD ── */
+#mood { background: var(--dark); }
+#mood .section-heading { color: var(--cream); }
+#mood .section-eyebrow { color: var(--caramel); }
+#mood .section-eyebrow::before { background: var(--caramel); }
+.mood-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: auto auto;
+  gap: 1.5rem;
+}
+.mood-card {
+  background: var(--mid); border: 1px solid rgba(196,154,108,0.1);
+  padding: 2rem; display: flex; flex-direction: column;
+  align-items: flex-start; gap: 0.8rem;
+  cursor: pointer; transition: border-color 0.3s, background 0.3s;
+  position: relative; overflow: hidden;
+}
+.mood-card:nth-child(1) { grid-column: span 2; }
+.mood-card:nth-child(4) { grid-column: span 2; }
+.mood-card:hover { border-color: rgba(196,154,108,0.4); background: #3a2010; }
+.mood-emoji { font-size: 3rem; }
+.mood-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.4rem; font-weight: 600; color: var(--cream);
+}
+.mood-desc { font-size: 0.85rem; line-height: 1.7; color: var(--gray); }
+.mood-tip {
+  font-size: 0.78rem; font-style: italic; color: var(--caramel);
+  margin-top: 0.5rem;
+}
+
+/* ── QUIZ ── */
+#quiz { background: var(--soft); }
+.quiz-inner { max-width: 640px; margin: 0 auto; }
+.quiz-prog { display: flex; gap: 5px; margin-bottom: 2rem; }
+.qbar { flex: 1; height: 2px; background: rgba(196,154,108,0.2); transition: background 0.4s; }
+.qbar.done { background: var(--accent); }
+.qbar.now  { background: rgba(196,154,108,0.55); }
+.q-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.8rem; font-weight: 300; line-height: 1.3;
+  color: var(--dark); margin-bottom: 2rem;
+}
+.q-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-bottom: 1.5rem; }
+.q-opt {
+  background: var(--cream); border: 1px solid rgba(196,154,108,0.2);
+  padding: 1rem 1.2rem; text-align: left;
+  font-family: 'Jost', sans-serif; font-size: 0.9rem;
+  color: var(--text); cursor: pointer; transition: all 0.22s;
+}
+.q-opt:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.q-opt.correct { border-color: #6dab6d; background: rgba(109,171,109,0.08); color: #4a8a4a; }
+.q-opt.wrong   { border-color: var(--accent); background: rgba(212,132,90,0.08); color: var(--accent); }
+.q-opt:disabled { cursor: default; }
+.q-meta { display: flex; justify-content: space-between; align-items: center; }
+.q-score {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.8rem; font-weight: 600; color: var(--accent);
+}
+
+/* ── FOOTER ── */
+footer {
+  background: var(--dark); padding: 3.5rem;
+  border-top: 1px solid rgba(196,154,108,0.1);
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 2rem;
+}
+.footer-brand {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.8rem; font-weight: 600; color: var(--cream);
+  letter-spacing: 0.05em;
+}
+.footer-brand span { color: var(--caramel); font-style: italic; }
+.footer-copy { font-size: 0.78rem; color: var(--gray); letter-spacing: 0.1em; }
+.footer-links { display: flex; gap: 2rem; list-style: none; }
+.footer-links a { font-size: 0.72rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gray); text-decoration: none; transition: color 0.3s; cursor: none; }
+.footer-links a:hover { color: var(--caramel); }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 2rem; right: 2rem;
+  background: var(--accent); color: var(--cream);
+  padding: 0.9rem 1.6rem;
+  font-family: 'Jost', sans-serif; font-size: 0.85rem; letter-spacing: 0.05em;
+  z-index: 800; transform: translateY(80px); opacity: 0;
+  transition: all 0.4s cubic-bezier(.25,.46,.45,.94);
+  pointer-events: none;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+
+/* ── REVEAL ── */
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.85s ease, transform 0.85s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+
+@media (max-width: 900px) {
+  #hero { grid-template-columns: 1fr; padding: 7rem 1.5rem 3rem; text-align: center; }
+  .hero-eyebrow, .hero-eyebrow::before { display: none; }
+  .hero-right { margin-top: 2rem; }
+  .cat-frame { width: 260px; height: 260px; font-size: 6rem; }
+  .hero-stat-strip { justify-content: center; }
+  .name-gen { grid-template-columns: 1fr; gap: 2rem; }
+  .mood-grid { grid-template-columns: 1fr 1fr; }
+  .mood-card:nth-child(1), .mood-card:nth-child(4) { grid-column: span 1; }
+  section { padding: 4.5rem 1.5rem; }
+  nav { padding: 1rem 1.5rem; }
+  .nav-links { gap: 1.2rem; }
+  .q-opts { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cur"></div>
+<div class="cursor-ring" id="curR"></div>
+<div class="toast" id="toast"></div>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-cat">🐱</div>
+  <div class="loader-text">Loading...</div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">ME<span>OW</span></div>
+  <ul class="nav-links">
+    <li><a href="#hero" class="active">Home</a></li>
+    <li><a href="#breeds">Breeds</a></li>
+    <li><a href="#facts">Cat Facts</a></li>
+    <li><a href="#care">Care Guide</a></li>
+    <li><a href="#names">Name Generator</a></li>
+    <li><a href="#quiz">Quiz</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg-shape"></div>
+  <div class="hero-dots"></div>
+  <div class="hero-left reveal">
+    <div class="hero-eyebrow">The World of Cats</div>
+    <h1>Curious,<br><em>elegant</em><br>& wild.</h1>
+    <p class="hero-desc">Discover breeds, fascinating facts, care guides, and everything you need to celebrate the most captivating creatures on Earth.</p>
+    <div class="hero-ctas">
+      <button class="btn-fill" onclick="smooth('breeds')">Explore Breeds</button>
+      <button class="btn-line" onclick="smooth('quiz')">Take the Quiz</button>
+    </div>
+    <div class="hero-stat-strip">
+      <div class="hero-stat"><div class="stat-n">70+</div><div class="stat-l">Recognized Breeds</div></div>
+      <div class="hero-stat"><div class="stat-n">500M</div><div class="stat-l">Domestic Cats</div></div>
+      <div class="hero-stat"><div class="stat-n">10k</div><div class="stat-l">Years Domesticated</div></div>
+    </div>
+  </div>
+  <div class="hero-right reveal" style="transition-delay:0.2s">
+    <div class="cat-frame">🐱</div>
+  </div>
+</section>
+
+<!-- BREEDS -->
+<section id="breeds">
+  <div class="section-eyebrow reveal">Breed Explorer</div>
+  <h2 class="section-heading reveal">Discover Every <em style="font-style:italic;color:var(--accent)">Breed</em></h2>
+  <div class="breed-search-bar reveal">
+    <input class="search-input" type="text" placeholder="Search breeds…" id="breedSearch" oninput="filterBreeds()">
+  </div>
+  <div class="filter-tags reveal" id="filterTags">
+    <button class="tag active" onclick="setFilter('all',this)">All</button>
+    <button class="tag" onclick="setFilter('playful',this)">Playful</button>
+    <button class="tag" onclick="setFilter('calm',this)">Calm</button>
+    <button class="tag" onclick="setFilter('fluffy',this)">Fluffy</button>
+    <button class="tag" onclick="setFilter('rare',this)">Rare</button>
+  </div>
+  <div class="breeds-grid reveal" id="breedsGrid"></div>
+</section>
+
+<!-- FACTS -->
+<section id="facts">
+  <div class="section-eyebrow reveal">Did You Know?</div>
+  <h2 class="section-heading reveal">Cat <em style="font-style:italic;color:var(--caramel)">Facts</em></h2>
+  <div class="fact-machine reveal">
+    <div class="fact-card">
+      <div class="fact-number" id="factNum">Fact 1 / 12</div>
+      <div class="fact-text" id="factText">Loading a fascinating cat fact…</div>
+    </div>
+    <div class="fact-btns">
+      <button class="fact-btn" onclick="prevFact()">← Previous</button>
+      <button class="fact-btn primary-fact" onclick="nextFact()">Next Fact →</button>
+      <button class="fact-btn" onclick="randomFact()">✦ Random</button>
+    </div>
+  </div>
+</section>
+
+<!-- CARE -->
+<section id="care">
+  <div class="section-eyebrow reveal">Essential Guide</div>
+  <h2 class="section-heading reveal">Cat <em style="font-style:italic;color:var(--accent)">Care</em></h2>
+  <div class="care-grid reveal" id="careGrid"></div>
+</section>
+
+<!-- NAME GENERATOR -->
+<section id="names">
+  <div class="section-eyebrow reveal">Find the Perfect Name</div>
+  <h2 class="section-heading reveal">Name <em style="font-style:italic;color:var(--accent)">Generator</em></h2>
+  <div class="name-gen reveal">
+    <div class="gen-controls">
+      <div class="gen-title">Customise your search</div>
+      <div class="gen-options">
+        <div class="gen-row">
+          <label class="gen-label">Gender</label>
+          <div class="radio-row" id="genderPicker">
+            <button class="radio-opt sel" onclick="pickGender('any',this)">Any</button>
+            <button class="radio-opt" onclick="pickGender('male',this)">Male</button>
+            <button class="radio-opt" onclick="pickGender('female',this)">Female</button>
+          </div>
+        </div>
+        <div class="gen-row">
+          <label class="gen-label">Style</label>
+          <div class="radio-row" id="stylePicker">
+            <button class="radio-opt sel" onclick="pickStyle('any',this)">Any</button>
+            <button class="radio-opt" onclick="pickStyle('classic',this)">Classic</button>
+            <button class="radio-opt" onclick="pickStyle('mythical',this)">Mythical</button>
+            <button class="radio-opt" onclick="pickStyle('nature',this)">Nature</button>
+            <button class="radio-opt" onclick="pickStyle('food',this)">Food</button>
+          </div>
+        </div>
+      </div>
+      <button class="btn-fill" onclick="generateNames()" style="cursor:none">Generate Names</button>
+    </div>
+    <div class="gen-results">
+      <div class="result-title">Your suggested names:</div>
+      <div class="names-list" id="namesList"></div>
+    </div>
+  </div>
+</section>
+
+<!-- MOOD -->
+<section id="mood">
+  <div class="section-eyebrow reveal">Understand Your Cat</div>
+  <h2 class="section-heading reveal">Cat <em style="font-style:italic;color:var(--caramel)">Moods</em></h2>
+  <div class="mood-grid reveal" id="moodGrid"></div>
+</section>
+
+<!-- QUIZ -->
+<section id="quiz">
+  <div class="section-eyebrow reveal">Test Your Knowledge</div>
+  <h2 class="section-heading reveal">Cat <em style="font-style:italic;color:var(--accent)">Quiz</em></h2>
+  <div class="quiz-inner reveal" id="quizWrap"></div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">ME<span>OW</span></div>
+  <p class="footer-copy">© 2025 MEOW — Celebrating cats everywhere.</p>
+  <ul class="footer-links">
+    <li><a href="#breeds">Breeds</a></li>
+    <li><a href="#care">Care</a></li>
+    <li><a href="#names">Names</a></li>
+  </ul>
+</footer>
+
+<script>
+/* ── CURSOR ── */
+const cur = document.getElementById('cur');
+const curR = document.getElementById('curR');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove', e => {
+  mx=e.clientX; my=e.clientY;
+  cur.style.left=mx+'px'; cur.style.top=my+'px';
+});
+(function animR(){ rx+=(mx-rx)*0.11; ry+=(my-ry)*0.11;
+  curR.style.left=rx+'px'; curR.style.top=ry+'px';
+  requestAnimationFrame(animR); })();
+
+/* ── LOADER ── */
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const L=document.getElementById('loader');
+    L.style.opacity='0';
+    setTimeout(()=>{ L.style.display='none'; }, 700);
+  }, 1300);
+});
+
+/* ── SCROLL REVEAL ── */
+const obs = new IntersectionObserver(es => {
+  es.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+}, {threshold:0.08});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+/* ── HELPERS ── */
+function smooth(id){ document.getElementById(id).scrollIntoView({behavior:'smooth'}); }
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+/* ── NAV ACTIVE ── */
+window.addEventListener('scroll', () => {
+  const ids=['hero','breeds','facts','care','names','mood','quiz'];
+  let cur='hero';
+  ids.forEach(id=>{ const el=document.getElementById(id); if(el&&window.scrollY>=el.offsetTop-180) cur=id; });
+  document.querySelectorAll('.nav-links a').forEach(a=>{
+    a.classList.toggle('active', a.getAttribute('href')==='#'+cur);
+  });
+});
+
+/* ── BREEDS DATA ── */
+const breeds = [
+  { name:'Persian', origin:'Iran', emoji:'😸', tags:['calm','fluffy'],
+    desc:'Gentle and quiet, Persians are known for their long silky coats and serene personalities.',
+    traits:['Long coat','Gentle','Indoor'] },
+  { name:'Maine Coon', origin:'USA', emoji:'🐈',tags:['playful','fluffy'],
+    desc:'One of the largest domestic breeds, affectionate, dog-like and endlessly curious.',
+    traits:['Giant size','Dog-like','Fluffy'] },
+  { name:'Siamese', origin:'Thailand', emoji:'😻', tags:['playful'],
+    desc:'Vocal, social and strikingly beautiful with vivid blue eyes and a sleek body.',
+    traits:['Vocal','Social','Blue eyes'] },
+  { name:'Bengal', origin:'USA', emoji:'🐆', tags:['playful','rare'],
+    desc:'Athletic and wild-looking with exotic leopard-like markings. Full of energy.',
+    traits:['Athletic','Wild look','Active'] },
+  { name:'Scottish Fold', origin:'Scotland', emoji:'🙀', tags:['calm','rare'],
+    desc:'Recognised by their uniquely folded ears and sweetly rounded faces.',
+    traits:['Folded ears','Round face','Quiet'] },
+  { name:'Ragdoll', origin:'USA', emoji:'😿', tags:['calm','fluffy'],
+    desc:'Go limp when held, hence the name. Gentle, affectionate and great with families.',
+    traits:['Floppy','Gentle','Blue eyes'] },
+  { name:'Sphynx', origin:'Canada', emoji:'🐱', tags:['playful','rare'],
+    desc:'Hairless and warm to the touch. Extroverted, mischievous and deeply affectionate.',
+    traits:['Hairless','Warm skin','Extrovert'] },
+  { name:'Abyssinian', origin:'Ethiopia', emoji:'🐈', tags:['playful'],
+    desc:'Slender and athletic with a ticked tabby coat. Highly intelligent and restless.',
+    traits:['Athletic','Curious','Smart'] },
+];
+
+let activeFilter = 'all';
+function setFilter(f, el) {
+  activeFilter = f;
+  document.querySelectorAll('.tag').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  filterBreeds();
+}
+function filterBreeds(){
+  const q = document.getElementById('breedSearch').value.toLowerCase();
+  const g = document.getElementById('breedsGrid');
+  g.innerHTML = breeds.filter(b => {
+    const matchQ = b.name.toLowerCase().includes(q) || b.origin.toLowerCase().includes(q);
+    const matchF = activeFilter==='all' || b.tags.includes(activeFilter);
+    return matchQ && matchF;
+  }).map(b => `
+    <div class="breed-card" onclick="toast('🐱 ${b.name} — ${b.origin}')">
+      <div class="breed-img" style="background:var(--warm)"><span>${b.emoji}</span></div>
+      <div class="breed-body">
+        <div class="breed-name">${b.name}</div>
+        <div class="breed-origin">${b.origin}</div>
+        <div class="breed-desc">${b.desc}</div>
+        <div class="breed-traits">${b.traits.map(t=>`<span class="trait">${t}</span>`).join('')}</div>
+      </div>
+    </div>
+  `).join('') || '<p style="color:var(--gray);font-style:italic;padding:1rem">No breeds found.</p>';
+}
+filterBreeds();
+
+/* ── FACTS ── */
+const facts = [
+  "Cats spend 70% of their lives sleeping — roughly 13 to 16 hours a day.",
+  "A group of cats is called a clowder. A group of kittens is called a kindle.",
+  "Cats have a unique collarbone structure that lets them always land on their feet — the righting reflex.",
+  "A cat's purr vibrates at 25–50 Hz, a frequency known to promote healing in bones and muscles.",
+  "Ancient Egyptians worshipped cats and mummified them alongside their owners.",
+  "Cats can rotate their ears 180 degrees independently, allowing incredible sound detection.",
+  "The oldest known pet cat was found in a 9,500-year-old grave in Cyprus.",
+  "A cat's nose print is as unique as a human fingerprint — no two are alike.",
+  "Cats cannot taste sweetness. They lack the taste receptor gene for sweet flavours.",
+  "Isaac Newton is credited with inventing the cat flap after his cat Spithead kept interrupting his experiments.",
+  "The world's longest domestic cat on record measured 1.23 metres (48.5 inches).",
+  "Cats walk like camels and giraffes — both right feet first, then both left feet.",
+];
+let fi = 0;
+function renderFact(){
+  document.getElementById('factNum').textContent = `Fact ${fi+1} / ${facts.length}`;
+  const el = document.getElementById('factText');
+  el.style.opacity='0';
+  setTimeout(()=>{ el.textContent = facts[fi]; el.style.opacity='1'; },200);
+}
+function nextFact(){ fi=(fi+1)%facts.length; renderFact(); }
+function prevFact(){ fi=(fi-1+facts.length)%facts.length; renderFact(); }
+function randomFact(){ fi=Math.floor(Math.random()*facts.length); renderFact(); }
+renderFact();
+
+/* ── CARE ── */
+const careData = [
+  { icon:'🍽️', name:'Nutrition', text:'Feed high-protein meals twice daily. Fresh water must always be available — cats are prone to chronic dehydration.',
+    more:'Avoid cow\'s milk and raw fish. Senior cats need lower-calorie diets. Wet food helps hydration.' },
+  { icon:'🩺', name:'Vet Visits', text:'Annual check-ups are essential. Core vaccines protect against common feline viruses.',
+    more:'Microchip your cat. Spaying or neutering reduces health risks and unwanted litters.' },
+  { icon:'🧶', name:'Enrichment', text:'Cats need mental stimulation. Puzzle feeders, wand toys, and window perches combat boredom.',
+    more:'Rotate toys weekly. Cardboard boxes are surprisingly effective enrichment tools.' },
+  { icon:'🛁', name:'Grooming', text:'Short-haired cats self-groom. Long-haired breeds need brushing several times a week.',
+    more:'Trim nails every 2–3 weeks. Check ears weekly. Dental hygiene is often overlooked but vital.' },
+  { icon:'🏠', name:'Safe Space', text:'Every cat needs a quiet retreat — a high perch or enclosed bed where they feel unthreatened.',
+    more:'Introduce new pets slowly. Cats are territorial and need time to adjust to changes.' },
+  { icon:'💊', name:'Parasite Control', text:'Monthly flea, tick and worm prevention keeps your cat healthy and your home safe.',
+    more:'Indoor cats still need parasite control. Heartworm prevention is critical in warmer climates.' },
+];
+document.getElementById('careGrid').innerHTML = careData.map((c,i) => `
+  <div class="care-item" onclick="toggleCare(${i})" id="care-${i}">
+    <span class="care-arrow">›</span>
+    <div class="care-icon">${c.icon}</div>
+    <div class="care-name">${c.name}</div>
+    <div class="care-text">${c.text}</div>
+    <div class="care-expand">
+      <div class="care-more">${c.more}</div>
+    </div>
+  </div>
+`).join('');
+function toggleCare(i){
+  const el=document.getElementById(`care-${i}`);
+  el.classList.toggle('open');
+}
+
+/* ── NAME GENERATOR ── */
+const nameDB = {
+  male: {
+    classic:  [{n:'Oliver',m:'Olive tree'},{n:'Leo',m:'Lion'},{n:'Jasper',m:'Treasure'},{n:'Chester',m:'Fortress'},{n:'Felix',m:'Happy'}],
+    mythical: [{n:'Apollo',m:'God of light'},{n:'Odin',m:'Norse Allfather'},{n:'Loki',m:'Trickster god'},{n:'Zeus',m:'King of gods'},{n:'Merlin',m:'Legendary wizard'}],
+    nature:   [{n:'Storm',m:'Wild weather'},{n:'Ash',m:'Ash tree'},{n:'Flint',m:'Fire stone'},{n:'Ridge',m:'Mountain ridge'},{n:'Brook',m:'Small stream'}],
+    food:     [{n:'Biscuit',m:'Buttery treat'},{n:'Cheddar',m:'Sharp cheese'},{n:'Mochi',m:'Japanese sweet'},{n:'Ginger',m:'Spicy root'},{n:'Walnut',m:'Earthy nut'}],
+  },
+  female: {
+    classic:  [{n:'Luna',m:'Moon'},{n:'Cleo',m:'Glory'},{n:'Stella',m:'Star'},{n:'Rosie',m:'Rose flower'},{n:'Nala',m:'Beloved'}],
+    mythical: [{n:'Athena',m:'Goddess of wisdom'},{n:'Freya',m:'Goddess of love'},{n:'Isis',m:'Egyptian goddess'},{n:'Aurora',m:'Goddess of dawn'},{n:'Circe',m:'Enchantress'}],
+    nature:   [{n:'Willow',m:'Weeping willow'},{n:'Ivy',m:'Climbing plant'},{n:'Fern',m:'Forest fern'},{n:'Maple',m:'Maple tree'},{n:'Wren',m:'Small songbird'}],
+    food:     [{n:'Cinnamon',m:'Warm spice'},{n:'Truffle',m:'Rare delicacy'},{n:'Hazel',m:'Hazelnut'},{n:'Butterscotch',m:'Sweet candy'},{n:'Caramel',m:'Golden sugar'}],
+  }
+};
+let selGender='any', selStyle='any';
+
+function pickGender(v,el){ selGender=v; document.querySelectorAll('#genderPicker .radio-opt').forEach(b=>b.classList.remove('sel')); el.classList.add('sel'); }
+function pickStyle(v,el){ selStyle=v; document.querySelectorAll('#stylePicker .radio-opt').forEach(b=>b.classList.remove('sel')); el.classList.add('sel'); }
+
+function generateNames(){
+  const genders = selGender==='any' ? ['male','female'] : [selGender];
+  const styles  = selStyle==='any' ? ['classic','mythical','nature','food'] : [selStyle];
+  let pool = [];
+  genders.forEach(g => styles.forEach(s => { pool = pool.concat(nameDB[g][s]); }));
+  const picked = pool.sort(()=>Math.random()-0.5).slice(0,6);
+  document.getElementById('namesList').innerHTML = picked.map(p => `
+    <div class="name-item" onclick="copyName('${p.n}')">
+      <div><div class="name-text">${p.n}</div><div class="name-meaning">${p.m}</div></div>
+      <span class="name-copy">Copy ✦</span>
+    </div>
+  `).join('');
+}
+function copyName(n){ navigator.clipboard?.writeText(n); toast(`📋 Copied "${n}" to clipboard!`); }
+generateNames();
+
+/* ── MOODS ── */
+const moods = [
+  { emoji:'😸', name:'Happy & Content', desc:'Slow blinking, soft purring, relaxed tail and a loose body posture all signal a deeply happy cat.', tip:'Slow-blink back to strengthen your bond.' },
+  { emoji:'😾', name:'Fearful', desc:'Flattened ears, tucked tail, dilated pupils and crouching indicate fear or stress.', tip:'Give space — never force interaction.' },
+  { emoji:'😼', name:'Playful', desc:'Dilated pupils, chattering at birds, pouncing on shadows — your cat wants to hunt!', tip:'Break out the wand toy — 15 minutes play burns energy.' },
+  { emoji:'😿', name:'In Pain', desc:'Hiding, loss of appetite, changes in breathing or unusual vocalisations are key warning signs.', tip:'Any sudden behaviour change warrants a vet visit.' },
+  { emoji:'🙀', name:'Overstimulated', desc:'Sudden tail lashing, skin rippling and flattened ears mid-petting mean stop — now.', tip:'Learn your cat\'s threshold to avoid bites.' },
+  { emoji:'😺', name:'Curious', desc:'Upright tail, whiskers forward, wide eyes and an open posture signal active exploration mode.', tip:'Rotate toys to keep curiosity alive.' },
+];
+document.getElementById('moodGrid').innerHTML = moods.map(m => `
+  <div class="mood-card" onclick="toast('${m.emoji} ${m.name}')">
+    <div class="mood-emoji">${m.emoji}</div>
+    <div class="mood-name">${m.name}</div>
+    <div class="mood-desc">${m.desc}</div>
+    <div class="mood-tip">💡 ${m.tip}</div>
+  </div>
+`).join('');
+
+/* ── QUIZ ── */
+const questions = [
+  { q:"How many hours a day do cats typically sleep?",    opts:["4–6","8–10","13–16","20–22"], ans:2 },
+  { q:"What is a group of cats called?",                 opts:["Pack","Clowder","Colony","Kindle"], ans:1 },
+  { q:"Cats cannot taste which flavour?",                opts:["Sour","Salty","Sweet","Bitter"], ans:2 },
+  { q:"What frequency does a cat's purr vibrate at?",    opts:["5–10 Hz","25–50 Hz","80–120 Hz","150+ Hz"], ans:1 },
+  { q:"Which breed is known for going limp when held?",  opts:["Siamese","Sphynx","Ragdoll","Bengal"], ans:2 },
+  { q:"How many years ago were cats first domesticated?",opts:["2,000","5,000","10,000","20,000"], ans:2 },
+  { q:"What is unique about a cat's nose print?",        opts:["It glows in UV light","It changes with age","It's as unique as a fingerprint","It has no sweat glands"], ans:2 },
+  { q:"Cats walk similarly to which two animals?",       opts:["Horse & Deer","Camel & Giraffe","Dog & Wolf","Rabbit & Kangaroo"], ans:1 },
+];
+let qi=0, qs=0, qAnswered=false;
+function renderQ(){
+  const w=document.getElementById('quizWrap');
+  if(qi>=questions.length){
+    w.innerHTML=`<div style="text-align:center;padding:3rem 0">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:5rem;color:var(--accent)">${qs}/${questions.length}</div>
+      <div style="font-family:'Jost',sans-serif;font-size:1rem;color:var(--gray);margin:1rem 0 2rem">
+        ${qs>=7?'🏆 Purrfect score — you\'re a true cat expert!':qs>=5?'😸 Great job! You know your cats.':'📚 Keep learning — cats are endlessly fascinating!'}
+      </div>
+      <button class="btn-fill" onclick="restartQ()" style="cursor:none">Play Again</button>
+    </div>`; return;
+  }
+  const q=questions[qi];
+  w.innerHTML=`
+    <div class="quiz-prog">${questions.map((_,i)=>`<div class="qbar ${i<qi?'done':i===qi?'now':''}"></div>`).join('')}</div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:1.5rem">
+      <div style="font-family:'Jost',sans-serif;font-size:0.8rem;color:var(--gray)">Question ${qi+1} of ${questions.length}</div>
+      <div class="q-score">${qs} pts</div>
+    </div>
+    <div class="q-text">${q.q}</div>
+    <div class="q-opts">${q.opts.map((o,i)=>`<button class="q-opt" id="qo${i}" onclick="ansQ(${i})">${o}</button>`).join('')}</div>
+  `;
+}
+function ansQ(i){
+  if(qAnswered) return; qAnswered=true;
+  const q=questions[qi];
+  document.querySelectorAll('.q-opt').forEach(b=>b.disabled=true);
+  if(i===q.ans){ document.getElementById(`qo${i}`).classList.add('correct'); qs++; toast('✅ Correct!'); }
+  else { document.getElementById(`qo${i}`).classList.add('wrong'); document.getElementById(`qo${q.ans}`).classList.add('correct'); toast('❌ Not quite!'); }
+  setTimeout(()=>{ qi++; qAnswered=false; renderQ(); },1100);
+}
+function restartQ(){ qi=0; qs=0; qAnswered=false; renderQ(); }
+renderQ();
+</script>
+</body>
+</html>
